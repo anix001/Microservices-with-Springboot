@@ -16,18 +16,20 @@ spring:
     driverClassName: org.postgresql.Driver
   application:
     name: RATING-SERVICE
+  config:
+    import: optional:configserver:http://localhost:8085
 
 server:
   port: 8083
 
-eureka:
-  instance:
-    prefer-ip-address: true
-  client:
-    fetch-registry: true
-    register-with-eureka: true
-    service-url:
-      defaultZone: http://localhost:8761/eureka
+#eureka:
+#  instance:
+#    prefer-ip-address: true
+#  client:
+#    fetch-registry: true
+#    register-with-eureka: true
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka
 
 
 
