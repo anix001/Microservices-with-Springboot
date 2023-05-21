@@ -4,6 +4,7 @@ import com.UserService.domain.Hotel;
 import com.UserService.domain.Rating;
 import com.UserService.domain.User;
 import com.UserService.dto.UserDto;
+import com.UserService.enumeration.Role;
 import com.UserService.exception.ResourceNotFoundException;
 import com.UserService.external.service.HotelService;
 import com.UserService.repository.UserRepository;
@@ -28,7 +29,7 @@ public class UserServiceImpl implements UserService {
     private final RestTemplate restTemplate;
     private final HotelService hotelService;
 
-    private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, BCryptPasswordEncoder bCryptPasswordEncoder, RestTemplate restTemplate, HotelService hotelService) {
         this.userRepository = userRepository;
@@ -64,13 +65,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto store(User user) {
+    public void store(User user) {
         UUID userId = UUID.randomUUID();
         user.setId(userId);
+        user.setRole(Role.USER);
         String encodedPassword = bCryptPasswordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
         userRepository.save(user);
-        return userMapper.modelTODto(user);
+//        return userMapper.modelTODto(user);
     }
 
     @Override

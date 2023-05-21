@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface UserService {
-    UserDto store(User user);
+    void store(User user);
     List<UserDto> getAll();
     UserDto get(UUID userId);
 }

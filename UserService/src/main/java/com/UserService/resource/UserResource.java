@@ -3,10 +3,9 @@ package com.UserService.resource;
 import com.UserService.domain.User;
 import com.UserService.dto.ApiResponse;
 import com.UserService.dto.UserDto;
+import com.UserService.enumeration.Role;
 import com.UserService.service.UserService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
-import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,11 +25,6 @@ public class UserResource {
 
     private final String successMessage = "Data Fetched Successfully";
 
-    @PostMapping
-    public ApiResponse<UserDto> store(@RequestBody User user){
-        return new ApiResponse<UserDto>(true, successMessage, HttpStatus.CREATED, userService.store(user));
-    }
-
     @GetMapping
     @CircuitBreaker(name ="ratingHotelBreaker", fallbackMethod = "ratingHotelListFallbackMethod")
     public ApiResponse<List<UserDto>> getAll(){
@@ -47,13 +41,13 @@ public class UserResource {
 
     private ApiResponse<List<UserDto>> ratingHotelListFallbackMethod(Exception e){
         List<UserDto> userDtoList = new ArrayList<>();
-        UserDto userDto = new UserDto(UUID.randomUUID(), "dummy", "dummy@gmail.com","Dummy", "Dummy","dummy location", "Server is down !! try after some time", false, new ArrayList<>());
+        UserDto userDto = new UserDto(UUID.randomUUID(), "dummy@gmail.com","Dummy","Dummy", Role.USER,"dummy location", "Server is down !! try after some time", false, new ArrayList<>());
         userDtoList.add(userDto);
         return new ApiResponse<List<UserDto>>(false, e.getMessage(), HttpStatus.FAILED_DEPENDENCY, userDtoList);
     }
 
     private ApiResponse<UserDto> ratingHotelFallbackMethod(UUID userId, Exception e){
-      UserDto userDto = new UserDto(UUID.randomUUID(), "dummy", "dummy@gmail.com","Dummy", "Dummy","dummy location", "Server is down !! try after some time", false, new ArrayList<>());
+      UserDto userDto = new UserDto(UUID.randomUUID(), "dummy@gmail.com","Dummy", "Dummy", Role.USER,"dummy location", "Server is down !! try after some time", false, new ArrayList<>());
       return new ApiResponse<UserDto>(false, e.getMessage(), HttpStatus.FAILED_DEPENDENCY, userDto);
     }
 }
