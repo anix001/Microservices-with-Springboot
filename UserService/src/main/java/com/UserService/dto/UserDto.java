@@ -1,6 +1,7 @@
 package com.UserService.dto;
 
 import com.UserService.domain.Rating;
+import com.UserService.enumeration.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,13 +21,13 @@ public class UserDto {
     @Id
     private UUID id;
 
-    private String userName;
-
     private String email;
 
     private String firstName;
 
     private String lastName;
+
+    private Role role;
 
     private String address;
 
