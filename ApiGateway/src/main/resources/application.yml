@@ -13,8 +13,6 @@ spring:
           uri: lb://USER-SERVICE
           predicates:
             - Path=/api/v1/users/**,/auth/**
-          filters:
-            - JwtAuthenticationFilter
 
         - id: HOTEL-SERVICE
           uri: lb://HOTEL-SERVICE

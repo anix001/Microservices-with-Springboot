@@ -5,10 +5,12 @@ import com.UserService.dto.ApiLoginRequest;
 import com.UserService.dto.ApiLoginResponse;
 import com.UserService.dto.ApiResponse;
 import com.UserService.service.AuthService;
-import com.UserService.service.JwtService;
 import com.UserService.service.UserService;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 
@@ -18,12 +20,10 @@ public class AuthResource {
 
     private final UserService userService;
     private final AuthService authService;
-    private final JwtService jwtService;
 
-    public AuthResource(UserService userService, AuthService authService, JwtService jwtService) {
+    public AuthResource(UserService userService, AuthService authService) {
         this.userService = userService;
         this.authService = authService;
-        this.jwtService = jwtService;
     }
 
     @PostMapping("/register")
@@ -37,9 +37,4 @@ public class AuthResource {
       return new ApiLoginResponse(true, "User LoggedIn", HttpStatus.OK, authService.login(apiLoginRequest));
     }
 
-    @GetMapping("/validate")
-    public ApiResponse validateToken(@RequestParam("token") String token) {
-        jwtService.validateToken(token);
-        return new ApiResponse(true,  "Token is valid", HttpStatus.OK, new ArrayList<>());
-    }
 }
