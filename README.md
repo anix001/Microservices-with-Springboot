@@ -1,9 +1,11 @@
 # Microservices-with-Springboot
 
 #UserService-Microservices
+```
 -GetAll User
  Method-GET
  localhost:{API-GATEWAY PORTNUMBER}/api/v1/users
+ ```
 
 -Get Single User
  METHOD-GET
