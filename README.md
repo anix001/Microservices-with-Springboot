@@ -1,16 +1,20 @@
 # Microservices-with-Springboot
 
-#UserService-Microservices
+##UserService-Microservices
+
 ```python
 -GetAll User
  Method-GET
  localhost:{API-GATEWAY PORTNUMBER}/api/v1/users
  ```
 
+```
 -Get Single User
  METHOD-GET
  localhost:{API-GATEWAY PORTNUMBER}/api/v1/users/{USER-ID}
+ ```
  
+ ```
 -Register User
 METHOD-POST
 localhost:{API-GATEWAY PORTNUMBER}/auth/register
@@ -24,9 +28,11 @@ localhost:{API-GATEWAY PORTNUMBER}/auth/register
    "description":" Dummy description",
    "isActive":false
 }
+```
 
 
-#RatingService-Microservice
+##RatingService-Microservice
+```
 - Post Rating
 METHOD-POST
 localhost:{API-GATEWAY PORTNUMBER}/api/v1/ratings
@@ -37,8 +43,10 @@ localhost:{API-GATEWAY PORTNUMBER}/api/v1/ratings
     "userId":{userId},
     "hotelId":{hotelId}
 }
+```
 
-#HotelService-Microservice
+##HotelService-Microservice
+```
 - Post Hotel
 METHOD-POST
 localhost:{API-GATEWAY PORTNUMBER}/api/v1/hotels
@@ -48,6 +56,6 @@ localhost:{API-GATEWAY PORTNUMBER}/api/v1/hotels
     "location":"Balaju, Kathmandu",
     "about":"A nice hotel"
 }
-
+```
 
 
