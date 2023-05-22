@@ -27,7 +27,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             if(validator.isSecured.test(exchange.getRequest())){
                 //header contains token or not
                 if(!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)){
-                    throw new RuntimeException("missing Authorization Header");
+                    throw new InvalidAccessException("missing Authorization Header");
                 }
 
                 //getting the Header
@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 //                    restTemplate.getForObject("http://USER-SERVICE/auth/validate?token="+ authHeader)
                     jwtUtil.validateToken(authHeader);
                 }catch (Exception e){
-                    throw new RuntimeException("Unauthorized access !!");
+                    throw new InvalidAccessException("Unauthorized access !!");
                 }
 
             }
