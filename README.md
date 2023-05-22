@@ -1,23 +1,24 @@
 # Microservices-with-Springboot
 
-##UserService-Microservices
+## UserService-Microservices
 
 ```python
--GetAll User
+ GetAll User
  Method-GET
- localhost:{API-GATEWAY PORTNUMBER}/api/v1/users
+ API-[hostUrl]/api/v1/users
  ```
 
-```
--Get Single User
- METHOD-GET
- localhost:{API-GATEWAY PORTNUMBER}/api/v1/users/{USER-ID}
+```python
+ Get Single User
+ Method-GET
+ API-[hostUrl]/api/v1/users/{USER-ID}
  ```
  
- ```
--Register User
-METHOD-POST
-localhost:{API-GATEWAY PORTNUMBER}/auth/register
+ ```python
+Register User
+Method-POST
+API-[hostUrl]/auth/register
+
 @RequestBody
 {
    "email":"dummy@gmail.com",
@@ -29,13 +30,26 @@ localhost:{API-GATEWAY PORTNUMBER}/auth/register
    "isActive":false
 }
 ```
+```python
+Login User
+Method-POST
+API-[hostUrl]/auth/authenticate
 
-
-##RatingService-Microservice
+@RequestBody
+{
+    "email":"dummy@gmail.com",
+    "password":"pwd"
+}
 ```
-- Post Rating
-METHOD-POST
-localhost:{API-GATEWAY PORTNUMBER}/api/v1/ratings
+
+
+## RatingService-Microservice
+
+```python
+Post Rating
+Method-POST
+API-localhost:[hostUrl]/api/v1/ratings
+
 @RequestBody
 {
     "rating": 5,
@@ -45,11 +59,13 @@ localhost:{API-GATEWAY PORTNUMBER}/api/v1/ratings
 }
 ```
 
-##HotelService-Microservice
-```
-- Post Hotel
+## HotelService-Microservice
+
+```python
+Create Hotel
 METHOD-POST
-localhost:{API-GATEWAY PORTNUMBER}/api/v1/hotels
+API- [hostUrl]/api/v1/hotels
+
 @RequestBody
 {
     "name":"The Kathmandu Hotel",
