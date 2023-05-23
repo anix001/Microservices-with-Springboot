@@ -1,5 +1,6 @@
 package com.ApiGateway.filter;
 
+import com.ApiGateway.exception.TokenNotValidException;
 import com.ApiGateway.jwt.JwtUtil;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -27,7 +28,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             if(validator.isSecured.test(exchange.getRequest())){
                 //header contains token or not
                 if(!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)){
-                    throw new InvalidAccessException("missing Authorization Header");
+                    throw new TokenNotValidException("missing Authorization Header");
                 }
 
                 //getting the Header
@@ -42,7 +43,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 //                    restTemplate.getForObject("http://USER-SERVICE/auth/validate?token="+ authHeader)
                     jwtUtil.validateToken(authHeader);
                 }catch (Exception e){
-                    throw new InvalidAccessException("Unauthorized access !!");
+                    throw new TokenNotValidException("Unauthorized access !!");
                 }
 
             }
