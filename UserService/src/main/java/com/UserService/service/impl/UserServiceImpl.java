@@ -3,6 +3,7 @@ package com.UserService.service.impl;
 import com.UserService.domain.Hotel;
 import com.UserService.domain.Rating;
 import com.UserService.domain.User;
+import com.UserService.dto.PasswordDto;
 import com.UserService.dto.UserDto;
 import com.UserService.enumeration.Role;
 import com.UserService.exception.ResourceNotFoundException;
@@ -12,12 +13,17 @@ import com.UserService.service.UserService;
 import com.UserService.service.mapper.UserMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -28,15 +34,17 @@ public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final RestTemplate restTemplate;
     private final HotelService hotelService;
+    private final UserDetailsService userDetailsService;
 
     private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, BCryptPasswordEncoder bCryptPasswordEncoder, RestTemplate restTemplate, HotelService hotelService) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, BCryptPasswordEncoder bCryptPasswordEncoder, RestTemplate restTemplate, HotelService hotelService, UserDetailsService userDetailsService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.restTemplate = restTemplate;
         this.hotelService = hotelService;
+        this.userDetailsService = userDetailsService;
     }
 
     private List<Rating> getUserRatings(UUID userId){
@@ -102,4 +110,29 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.modelTODto(user);
     }
+
+    @Override
+    public UserDetails getCurrentLoggedInUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        Optional<User> loggedUserData = userRepository.findByEmail(userDetails.getUsername());
+        return userDetailsService.loadUserByUsername(loggedUserData.get().getEmail());
+    }
+
+
+    @Override
+    public void changePassword(PasswordDto passwordDto) {
+      String userEmail = getCurrentLoggedInUser().getUsername();
+      User currentUser = userRepository.findByEmail(userEmail).orElseThrow(()-> new ResourceNotFoundException("User not found!!, Cannot change the password !!"));
+      //checking the currentUser password and requestBody oldPassword are same or not
+      if(bCryptPasswordEncoder.matches(passwordDto.getOldPassword(), currentUser.getPassword())){
+          if(passwordDto.getNewPassword().equals(passwordDto.getConfirmNewPassword())){
+              currentUser.setPassword(bCryptPasswordEncoder.encode(passwordDto.getNewPassword()));
+              userRepository.save(currentUser);
+          }else{
+              throw new ResourceNotFoundException("New password and confirm new password aren't same !!");
+          }
+      }
+    }
+
 }

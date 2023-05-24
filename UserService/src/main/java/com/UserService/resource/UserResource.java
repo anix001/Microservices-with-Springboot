@@ -2,6 +2,7 @@ package com.UserService.resource;
 
 import com.UserService.domain.User;
 import com.UserService.dto.ApiResponse;
+import com.UserService.dto.PasswordDto;
 import com.UserService.dto.UserDto;
 import com.UserService.enumeration.Role;
 import com.UserService.service.UserService;
@@ -37,6 +38,11 @@ public class UserResource {
 //    @RateLimiter(name = "userRateLimiter", fallbackMethod = "ratingHotelFallbackMethod")
     public ApiResponse<UserDto> get(@PathVariable UUID userId){
         return new ApiResponse<UserDto>(true, successMessage, HttpStatus.OK, userService.get(userId));
+    }
+
+    @PostMapping("/change-password")
+    public ApiResponse changePassword(@RequestBody PasswordDto password){
+        return new ApiResponse<>(true, "Password Changed Successfully !!", HttpStatus.OK, new ArrayList<>());
     }
 
     private ApiResponse<List<UserDto>> ratingHotelListFallbackMethod(Exception e){
