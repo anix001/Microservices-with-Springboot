@@ -1,11 +1,14 @@
 package com.ApiGateway.jwt;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.util.Date;
+import java.util.function.Function;
 
 @Component
 public class JwtUtil {
@@ -20,4 +23,5 @@ public class JwtUtil {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+
 }

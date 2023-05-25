@@ -42,6 +42,7 @@ public class UserResource {
 
     @PostMapping("/change-password")
     public ApiResponse changePassword(@RequestBody PasswordDto password){
+        userService.changePassword(password);
         return new ApiResponse<>(true, "Password Changed Successfully !!", HttpStatus.OK, new ArrayList<>());
     }
 

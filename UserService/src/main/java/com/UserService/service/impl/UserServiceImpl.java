@@ -3,14 +3,19 @@ package com.UserService.service.impl;
 import com.UserService.domain.Hotel;
 import com.UserService.domain.Rating;
 import com.UserService.domain.User;
+import com.UserService.dto.ApiLoginRequest;
 import com.UserService.dto.PasswordDto;
 import com.UserService.dto.UserDto;
+import com.UserService.dto.VerifyOtpDto;
 import com.UserService.enumeration.Role;
+import com.UserService.enumeration.UserStatus;
 import com.UserService.exception.ResourceNotFoundException;
 import com.UserService.external.service.HotelService;
 import com.UserService.repository.UserRepository;
+import com.UserService.service.EmailService;
 import com.UserService.service.UserService;
 import com.UserService.service.mapper.UserMapper;
+import com.UserService.utils.EmailValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -35,21 +40,26 @@ public class UserServiceImpl implements UserService {
     private final RestTemplate restTemplate;
     private final HotelService hotelService;
     private final UserDetailsService userDetailsService;
+    private final EmailValidator emailValidator;
+    private final EmailService emailService;
 
     private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, BCryptPasswordEncoder bCryptPasswordEncoder, RestTemplate restTemplate, HotelService hotelService, UserDetailsService userDetailsService) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, BCryptPasswordEncoder bCryptPasswordEncoder, RestTemplate restTemplate, HotelService hotelService, UserDetailsService userDetailsService, EmailValidator emailValidator, EmailService emailService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.restTemplate = restTemplate;
         this.hotelService = hotelService;
         this.userDetailsService = userDetailsService;
+        this.emailValidator = emailValidator;
+        this.emailService = emailService;
     }
 
     private List<Rating> getUserRatings(UUID userId){
         Rating[] userRatingList = restTemplate.getForObject("http://RATING-SERVICE/api/v1/ratings/user/"+userId, Rating[].class);
 
+        assert userRatingList != null;
         List<Rating> ratings = Arrays.stream(userRatingList).collect(Collectors.toList());
 
         List<Rating> userRatingWithHotelDetails = ratings.stream().map(rating -> {
@@ -77,9 +87,13 @@ public class UserServiceImpl implements UserService {
         UUID userId = UUID.randomUUID();
         user.setId(userId);
         user.setRole(Role.USER);
-        String encodedPassword = bCryptPasswordEncoder.encode(user.getPassword());
-        user.setPassword(encodedPassword);
-        userRepository.save(user);
+        user.setIsAccountActive(UserStatus.PENDING);
+        if(emailValidator.isValidEmailAddress(user.getEmail())) {
+            userRepository.save(user);
+            emailService.verifyAccount(user.getEmail());
+        }else {
+            throw new ResourceNotFoundException("Email Address is not valid !!");
+        }
 //        return userMapper.modelTODto(user);
     }
 
@@ -129,10 +143,33 @@ public class UserServiceImpl implements UserService {
           if(passwordDto.getNewPassword().equals(passwordDto.getConfirmNewPassword())){
               currentUser.setPassword(bCryptPasswordEncoder.encode(passwordDto.getNewPassword()));
               userRepository.save(currentUser);
+              logger.info(userEmail);
           }else{
               throw new ResourceNotFoundException("New password and confirm new password aren't same !!");
           }
       }
+    }
+
+    @Override
+    public void verifyOtp(VerifyOtpDto otpDto) {
+       User user = userRepository.findByEmail(otpDto.getUsername()).orElseThrow(()-> new ResourceNotFoundException("User not found !!, Otp cannot be verified !!"));
+       if(bCryptPasswordEncoder.matches(otpDto.getOtp(), user.getOtp())){
+           if(user.getIsAccountActive() == UserStatus.PENDING){
+           user.setIsAccountActive(UserStatus.ACTIVE);
+           userRepository.save(user);
+           }else{
+               userRepository.save(user);
+           }
+       }else{
+           throw new ResourceNotFoundException("OTP does not match !!, Please check and try again");
+       }
+    }
+
+    @Override
+    public void setUserPassword(ApiLoginRequest password) {
+        User user = userRepository.findByEmail(password.getEmail()).orElseThrow(()-> new ResourceNotFoundException("User not found !!, Otp cannot be verified !!"));
+        user.setPassword(bCryptPasswordEncoder.encode(password.getPassword()));
+        userRepository.save(user);
     }
 
 }

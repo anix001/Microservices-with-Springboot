@@ -1,6 +1,7 @@
 package com.UserService.domain;
 
 import com.UserService.enumeration.Role;
+import com.UserService.enumeration.UserStatus;
 import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -45,7 +46,11 @@ public class User implements UserDetails {
     private String description;
 
     @Column(name = "is_Active")
-    private boolean isActive;
+    @Enumerated(EnumType.STRING)
+    private UserStatus isAccountActive;
+
+    @Column(name = "user_otp")
+    private String otp;
 
     @Transient
     private List<Rating> ratings = new ArrayList<>();
