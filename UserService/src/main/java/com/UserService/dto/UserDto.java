@@ -33,7 +33,7 @@ public class UserDto {
 
     private String about;
 
-    private boolean isActive;
+    private boolean isAccountActive;
 
     private List<Rating> ratings = new ArrayList<>();
 }

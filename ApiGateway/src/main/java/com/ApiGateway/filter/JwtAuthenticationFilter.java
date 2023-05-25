@@ -1,10 +1,13 @@
 package com.ApiGateway.filter;
 
+import com.ApiGateway.exception.TokenNotValidException;
 import com.ApiGateway.jwt.JwtUtil;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 @Component
 public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAuthenticationFilter.Config> {
@@ -27,11 +30,11 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             if(validator.isSecured.test(exchange.getRequest())){
                 //header contains token or not
                 if(!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)){
-                    throw new InvalidAccessException("missing Authorization Header");
+                    throw new TokenNotValidException("missing Authorization Header");
                 }
 
                 //getting the Header
-                String authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
+                String authHeader = Objects.requireNonNull(Objects.requireNonNull(exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION))).get(0);
 
                 if(authHeader != null && authHeader.startsWith("Bearer ")){
                     //removing Bearer from tokenJwtAuthenticationFilter
@@ -42,7 +45,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 //                    restTemplate.getForObject("http://USER-SERVICE/auth/validate?token="+ authHeader)
                     jwtUtil.validateToken(authHeader);
                 }catch (Exception e){
-                    throw new InvalidAccessException("Unauthorized access !!");
+                    throw new TokenNotValidException("Unauthorized access !!");
                 }
 
             }
