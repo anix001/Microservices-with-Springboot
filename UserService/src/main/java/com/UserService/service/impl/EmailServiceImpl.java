@@ -63,7 +63,7 @@ public class EmailServiceImpl implements EmailService {
         String newOtp = otpGenerator.generateOTP();
         String userVerifyLink = "http://localhost:3000/auth/verify-otp?username="+to;
 
-        String message =  "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c;border:1px solid #f8f8f8; border-radius:10px;\">\n"+
+        String message =  "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c;border:3px solid #f8f8f8;padding:10px; border-radius:10px;\">\n"+
                 "<p>Hello </p><b>" + to + "</b>, \n"+
                 "\n"+
                 "<p>Thank you for signing up with Microservices with Spring boot !! </p>\n"+
@@ -97,7 +97,7 @@ public class EmailServiceImpl implements EmailService {
         String newOtp = otpGenerator.generateOTP();
         String userVerifyLink = "http://localhost:3000/auth/verify-otp?username="+to;
 
-        String message = "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c;border:1px solid #f8f8f8; border-radius:10px;\">\n"+
+        String message = "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c;border:3px solid #f8f8f8;padding:10px; border-radius:10px;\">\n"+
                 "\n"+
                 "<p>Hello </p><b>" + to + "</b>, \n"+
                 "\n"+
