@@ -23,11 +23,9 @@ API-[hostUrl]/auth/register
 {
    "email":"dummy@gmail.com",
    "address":"Dummy Address",
-   "password":"pwd",
    "firstName":"Dummy",
    "lastName":"Dummy",
-   "description":" Dummy description",
-   "isActive":false
+   "description":" Dummy description"
 }
 ```
 ```python
