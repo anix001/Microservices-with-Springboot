@@ -16,5 +16,7 @@ public class ApiExceptionResponse {
     private Boolean success;
     private String message;
     private HttpStatus httpStatus;
+    private String requestType;
+    private String requestUrl;
     private ZonedDateTime timestamp;
 }

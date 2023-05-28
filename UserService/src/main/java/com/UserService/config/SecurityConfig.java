@@ -1,6 +1,6 @@
 package com.UserService.config;
 
-import com.UserService.exception.ResourceNotFoundException;
+import com.UserService.exception.NotFoundException;
 import com.UserService.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +28,7 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService(){
         return username -> userRepository.findByEmail(username)
-                .orElseThrow(()->new ResourceNotFoundException("User not found with username: " + username));
+                .orElseThrow(()->new NotFoundException("User not found with username: " + username));
 
     }
 

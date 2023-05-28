@@ -9,7 +9,8 @@ import com.UserService.dto.UserDto;
 import com.UserService.dto.VerifyOtpDto;
 import com.UserService.enumeration.Role;
 import com.UserService.enumeration.UserStatus;
-import com.UserService.exception.ResourceNotFoundException;
+import com.UserService.exception.NotAcceptableException;
+import com.UserService.exception.NotFoundException;
 import com.UserService.external.service.HotelService;
 import com.UserService.repository.UserRepository;
 import com.UserService.service.EmailService;
@@ -89,10 +90,16 @@ public class UserServiceImpl implements UserService {
         user.setRole(Role.USER);
         user.setIsAccountActive(UserStatus.PENDING);
         if(emailValidator.isValidEmailAddress(user.getEmail())) {
+            Optional<User> isUserAlreadyRegister = userRepository.findByEmail(user.getEmail());
+
+            if(isUserAlreadyRegister.isPresent()){
+                throw new NotAcceptableException("Email Address is already registered");
+            }
+
             userRepository.save(user);
             emailService.verifyAccount(user.getEmail());
         }else {
-            throw new ResourceNotFoundException("Email Address is not valid !!");
+            throw new NotAcceptableException("Email Address is not valid !!");
         }
 //        return userMapper.modelTODto(user);
     }
@@ -114,7 +121,7 @@ public class UserServiceImpl implements UserService {
     public UserDto get(UUID userId) {
 
         //get user from db with the help of user repository
-        User user = userRepository.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User is not found with id: "+ userId));
+        User user = userRepository.findById(userId).orElseThrow(()-> new NotFoundException("User is not found with id: "+ userId));
         //fetch rating of the above user from RATING_SERVICE
         //localhost:8083/api/v1/ratings/user/41d89001-3739-427c-9438-77ae51268ce3
 
@@ -137,7 +144,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void changePassword(PasswordDto passwordDto) {
       String userEmail = getCurrentLoggedInUser().getUsername();
-      User currentUser = userRepository.findByEmail(userEmail).orElseThrow(()-> new ResourceNotFoundException("User not found!!, Cannot change the password !!"));
+      User currentUser = userRepository.findByEmail(userEmail).orElseThrow(()-> new NotFoundException("User not found!!, Cannot change the password !!"));
       //checking the currentUser password and requestBody oldPassword are same or not
       if(bCryptPasswordEncoder.matches(passwordDto.getOldPassword(), currentUser.getPassword())){
           if(passwordDto.getNewPassword().equals(passwordDto.getConfirmNewPassword())){
@@ -145,14 +152,14 @@ public class UserServiceImpl implements UserService {
               userRepository.save(currentUser);
               logger.info(userEmail);
           }else{
-              throw new ResourceNotFoundException("New password and confirm new password aren't same !!");
+              throw new NotAcceptableException("New password and confirm new password aren't same !!");
           }
       }
     }
 
     @Override
     public void verifyOtp(VerifyOtpDto otpDto) {
-       User user = userRepository.findByEmail(otpDto.getUsername()).orElseThrow(()-> new ResourceNotFoundException("User not found !!, Otp cannot be verified !!"));
+       User user = userRepository.findByEmail(otpDto.getUsername()).orElseThrow(()-> new NotFoundException("User not found !!, Otp cannot be verified !!"));
        if(bCryptPasswordEncoder.matches(otpDto.getOtp(), user.getOtp())){
            if(user.getIsAccountActive() == UserStatus.PENDING){
            user.setIsAccountActive(UserStatus.ACTIVE);
@@ -161,13 +168,13 @@ public class UserServiceImpl implements UserService {
                userRepository.save(user);
            }
        }else{
-           throw new ResourceNotFoundException("OTP does not match !!, Please check and try again");
+           throw new NotAcceptableException("OTP does not match !!, Please check and try again");
        }
     }
 
     @Override
     public void setUserPassword(ApiLoginRequest password) {
-        User user = userRepository.findByEmail(password.getEmail()).orElseThrow(()-> new ResourceNotFoundException("User not found !!, Otp cannot be verified !!"));
+        User user = userRepository.findByEmail(password.getEmail()).orElseThrow(()-> new NotFoundException("User not found !!, Otp cannot be verified !!"));
         user.setPassword(bCryptPasswordEncoder.encode(password.getPassword()));
         userRepository.save(user);
     }

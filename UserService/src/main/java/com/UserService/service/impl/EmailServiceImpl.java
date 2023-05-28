@@ -1,7 +1,7 @@
 package com.UserService.service.impl;
 
 import com.UserService.domain.User;
-import com.UserService.exception.ResourceNotFoundException;
+import com.UserService.exception.NotFoundException;
 import com.UserService.repository.UserRepository;
 import com.UserService.service.EmailService;
 import com.UserService.utils.OTPGenerator;
@@ -53,7 +53,7 @@ public class EmailServiceImpl implements EmailService {
 
             Transport.send(message);
         }catch (Exception e){
-            throw new ResourceNotFoundException("Mail cannot be sent !!" + e);
+            throw new NotFoundException("Mail cannot be sent !!" + e);
         }
     }
 
@@ -86,7 +86,7 @@ public class EmailServiceImpl implements EmailService {
                 "</div>"
                 ;
 
-        User user = userRepository.findByEmail(to).orElseThrow(()-> new ResourceNotFoundException("User is not found"));
+        User user = userRepository.findByEmail(to).orElseThrow(()-> new NotFoundException("User is not found"));
         user.setOtp(bCryptPasswordEncoder.encode(newOtp));
         userRepository.save(user);
         mailSender(to, "Account Activation Email", message);
@@ -118,7 +118,7 @@ public class EmailServiceImpl implements EmailService {
                 "<p>&#169; anix001</p>"+
                 "</div>";
 
-        User user = userRepository.findByEmail(to).orElseThrow(()-> new ResourceNotFoundException("User is not found"));
+        User user = userRepository.findByEmail(to).orElseThrow(()-> new NotFoundException("User is not found"));
         user.setOtp(bCryptPasswordEncoder.encode(newOtp));
         userRepository.save(user);
         mailSender(to, "Reset Password Email", message);
