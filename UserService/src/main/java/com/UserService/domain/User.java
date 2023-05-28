@@ -49,11 +49,12 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserStatus isAccountActive;
 
-    @Column(name = "user_otp")
-    private String otp;
-
     @Transient
     private List<Rating> ratings = new ArrayList<>();
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="user_otp")
+    private UserOTP userOTP;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

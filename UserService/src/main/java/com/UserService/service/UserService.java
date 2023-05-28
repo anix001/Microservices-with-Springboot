@@ -17,5 +17,6 @@ public interface UserService {
     UserDetails getCurrentLoggedInUser();
     void changePassword(PasswordDto passwordDto);
     void verifyOtp(VerifyOtpDto otpDto);
+    void regenerateOtp(String userEmail, boolean forgotPassword);
     void setUserPassword(ApiLoginRequest userPassword);
 }
