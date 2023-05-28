@@ -1,9 +1,11 @@
 package com.UserService.service.impl;
 
 import com.UserService.domain.User;
+import com.UserService.domain.UserOTP;
 import com.UserService.exception.NotFoundException;
 import com.UserService.repository.UserRepository;
 import com.UserService.service.EmailService;
+import com.UserService.utils.CurrentTimeGenerator;
 import com.UserService.utils.OTPGenerator;
 import jakarta.mail.*;
 import jakarta.mail.internet.InternetAddress;
@@ -11,6 +13,8 @@ import jakarta.mail.internet.MimeMessage;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 @Service
@@ -19,10 +23,13 @@ public class EmailServiceImpl implements EmailService {
     private  final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final OTPGenerator otpGenerator;
 
-    public EmailServiceImpl(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, OTPGenerator otpGenerator) {
+    private final CurrentTimeGenerator currentTimeGenerator;
+
+    public EmailServiceImpl(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, OTPGenerator otpGenerator, CurrentTimeGenerator currentTimeGenerator) {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.otpGenerator = otpGenerator;
+        this.currentTimeGenerator = currentTimeGenerator;
     }
 
     private void mailSender(String to, String subject, String userMessage){
@@ -68,7 +75,9 @@ public class EmailServiceImpl implements EmailService {
                 "\n"+
                 "<p>Thank you for signing up with Microservices with Spring boot !! </p>\n"+
                 "\n"+
-                "<p>Use the following OTP to reset your account password: [ <b>" + newOtp + " </b>]</p> \n"+
+                "<p>Use the following OTP to reset your account password: [ <b>" + newOtp + " </b>].</p> \n"+
+                "\n"+
+                "<p>This OTP expires in 15 minutes.</p> \n"+
                 "\n"+
                 "<p>To activate your account, please click the link below to confirm your email address:</p>\n" +
                 "\n"+
@@ -87,7 +96,9 @@ public class EmailServiceImpl implements EmailService {
                 ;
 
         User user = userRepository.findByEmail(to).orElseThrow(()-> new NotFoundException("User is not found"));
-        user.setOtp(bCryptPasswordEncoder.encode(newOtp));
+        String currentTime = currentTimeGenerator.getCurrentTime();
+        UserOTP userOTP = new UserOTP(bCryptPasswordEncoder.encode(newOtp), currentTime);
+        user.setUserOTP(userOTP);
         userRepository.save(user);
         mailSender(to, "Account Activation Email", message);
     }
@@ -102,6 +113,8 @@ public class EmailServiceImpl implements EmailService {
                 "<p>Hello </p><b>" + to + "</b>, \n"+
                 "\n"+
                 "<p>Use the following OTP to reset your account password: [ <b>" + newOtp + " </b>]</p> \n"+
+                "\n"+
+                "<p>This OTP expires in 15 minutes.</p> \n"+
                 "\n"+
                 "<p>To Reset your password, please click the link below:</p>\n" +
                 "\n"+
@@ -119,7 +132,9 @@ public class EmailServiceImpl implements EmailService {
                 "</div>";
 
         User user = userRepository.findByEmail(to).orElseThrow(()-> new NotFoundException("User is not found"));
-        user.setOtp(bCryptPasswordEncoder.encode(newOtp));
+        String currentTime = currentTimeGenerator.getCurrentTime();
+        UserOTP userOTP = new UserOTP(bCryptPasswordEncoder.encode(newOtp), currentTime);
+        user.setUserOTP(userOTP);
         userRepository.save(user);
         mailSender(to, "Reset Password Email", message);
     }

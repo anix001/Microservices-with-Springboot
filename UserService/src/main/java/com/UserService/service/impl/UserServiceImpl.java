@@ -16,6 +16,7 @@ import com.UserService.repository.UserRepository;
 import com.UserService.service.EmailService;
 import com.UserService.service.UserService;
 import com.UserService.service.mapper.UserMapper;
+import com.UserService.utils.CurrentTimeGenerator;
 import com.UserService.utils.EmailValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,10 +44,11 @@ public class UserServiceImpl implements UserService {
     private final UserDetailsService userDetailsService;
     private final EmailValidator emailValidator;
     private final EmailService emailService;
+    private final CurrentTimeGenerator currentTimeGenerator;
 
     private final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, BCryptPasswordEncoder bCryptPasswordEncoder, RestTemplate restTemplate, HotelService hotelService, UserDetailsService userDetailsService, EmailValidator emailValidator, EmailService emailService) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, BCryptPasswordEncoder bCryptPasswordEncoder, RestTemplate restTemplate, HotelService hotelService, UserDetailsService userDetailsService, EmailValidator emailValidator, EmailService emailService, CurrentTimeGenerator currentTimeGenerator) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
@@ -55,6 +57,7 @@ public class UserServiceImpl implements UserService {
         this.userDetailsService = userDetailsService;
         this.emailValidator = emailValidator;
         this.emailService = emailService;
+        this.currentTimeGenerator = currentTimeGenerator;
     }
 
     private List<Rating> getUserRatings(UUID userId){
@@ -160,7 +163,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public void verifyOtp(VerifyOtpDto otpDto) {
        User user = userRepository.findByEmail(otpDto.getUsername()).orElseThrow(()-> new NotFoundException("User not found !!, Otp cannot be verified !!"));
-       if(bCryptPasswordEncoder.matches(otpDto.getOtp(), user.getOtp())){
+       String currentTime = currentTimeGenerator.getCurrentTime();
+       String diffBetweenOtpTime = currentTimeGenerator.getDiffBetweenTwoTime(user.getUserOTP().getExpiresAt(), currentTime);
+       if(Long.parseLong(diffBetweenOtpTime) > 15){
+           throw new NotAcceptableException("Otp is Expired !!");
+       }else if(user.getIsAccountActive() == UserStatus.ACTIVE){
+           throw new NotAcceptableException("Otp is already verified !!");
+       }else if(bCryptPasswordEncoder.matches(otpDto.getOtp(), user.getUserOTP().getOtp())){
            if(user.getIsAccountActive() == UserStatus.PENDING){
            user.setIsAccountActive(UserStatus.ACTIVE);
            userRepository.save(user);
@@ -170,6 +179,16 @@ public class UserServiceImpl implements UserService {
        }else{
            throw new NotAcceptableException("OTP does not match !!, Please check and try again");
        }
+    }
+
+    @Override
+    public void regenerateOtp(String userEmail, boolean forgotPassword) {
+        User user = userRepository.findByEmail(userEmail).orElseThrow(()-> new NotFoundException("User not found !!, Otp cannot be verified !!"));
+        if(forgotPassword){
+            emailService.forgotPassword(userEmail);
+        }else {
+            emailService.verifyAccount(user.getEmail());
+        }
     }
 
     @Override
