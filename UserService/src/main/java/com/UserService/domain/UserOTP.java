@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.UUID;
 
 @Entity
 @Table(name = "_user_otp")
@@ -20,9 +19,11 @@ public class UserOTP {
     private Long id;
     private String otp;
     private String expiresAt;
+    private Boolean isOtpVerified = false;
 
     public UserOTP(String otp, String expiresAt) {
         this.otp = otp;
         this.expiresAt = expiresAt;
     }
+
 }
