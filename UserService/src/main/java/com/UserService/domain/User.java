@@ -49,6 +49,8 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserStatus isAccountActive;
 
+    private Boolean isForgotPassword = false;
+
     @Transient
     private List<Rating> ratings = new ArrayList<>();
 

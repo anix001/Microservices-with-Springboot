@@ -132,6 +132,7 @@ public class EmailServiceImpl implements EmailService {
                 "</div>";
 
         User user = userRepository.findByEmail(to).orElseThrow(()-> new NotFoundException("User is not found"));
+        user.setIsForgotPassword(true);
         String currentTime = currentTimeGenerator.getCurrentTime();
         UserOTP userOTP = new UserOTP(bCryptPasswordEncoder.encode(newOtp), currentTime);
         user.setUserOTP(userOTP);

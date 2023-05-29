@@ -3,6 +3,7 @@ package com.UserService.service.impl;
 import com.UserService.domain.Hotel;
 import com.UserService.domain.Rating;
 import com.UserService.domain.User;
+import com.UserService.domain.UserOTP;
 import com.UserService.dto.ApiLoginRequest;
 import com.UserService.dto.PasswordDto;
 import com.UserService.dto.UserDto;
@@ -165,17 +166,18 @@ public class UserServiceImpl implements UserService {
        User user = userRepository.findByEmail(otpDto.getUsername()).orElseThrow(()-> new NotFoundException("User not found !!, Otp cannot be verified !!"));
        String currentTime = currentTimeGenerator.getCurrentTime();
        String diffBetweenOtpTime = currentTimeGenerator.getDiffBetweenTwoTime(user.getUserOTP().getExpiresAt(), currentTime);
-       if(Long.parseLong(diffBetweenOtpTime) > 15){
+       if(user.getUserOTP().getIsOtpVerified()){
+            throw new NotAcceptableException("Otp is already verified");
+        }else if(Long.parseLong(diffBetweenOtpTime) > 2){
            throw new NotAcceptableException("Otp is Expired !!");
-       }else if(user.getIsAccountActive() == UserStatus.ACTIVE){
-           throw new NotAcceptableException("Otp is already verified !!");
        }else if(bCryptPasswordEncoder.matches(otpDto.getOtp(), user.getUserOTP().getOtp())){
-           if(user.getIsAccountActive() == UserStatus.PENDING){
+           if(user.getIsAccountActive() == UserStatus.PENDING && !user.getIsForgotPassword()){
            user.setIsAccountActive(UserStatus.ACTIVE);
-           userRepository.save(user);
            }else{
-               userRepository.save(user);
+               user.setIsForgotPassword(false);
            }
+           user.getUserOTP().setIsOtpVerified(true);
+           userRepository.save(user);
        }else{
            throw new NotAcceptableException("OTP does not match !!, Please check and try again");
        }
